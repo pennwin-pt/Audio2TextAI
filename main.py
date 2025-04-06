@@ -11,31 +11,41 @@ try:
 except Exception as e:
     print(f"Failed to load model: {e}")
 
-@app.route('/transcribe', methods=['POST'])
-def transcribe_audio():
+@app.route('/transcribe_pt', methods=['POST'])
+def transcribe_pt_audio():
     """
     接收音频文件并返回转录文本
     """
+    return handle_transcribe_audio("pt")
+
+@app.route('/transcribe_zh', methods=['POST'])
+def transcribe_zh_audio():
+    """
+    接收音频文件并返回转录文本
+    """
+    return handle_transcribe_audio("zh")
+
+
+def handle_transcribe_audio(language):
     if not model:
         return jsonify({"status": "error", "message": "Model not loaded"}), 500
-
     if 'audio_file' not in request.files:
         return jsonify({"status": "error", "message": "No audio file provided"}), 400
-
     audio_file = request.files['audio_file']
-
     # 校验文件格式（仅支持 WAV）
     if not audio_file.filename.endswith('.wav'):
         return jsonify({"status": "error", "message": "Unsupported audio format. Only WAV is supported."}), 415
-
     try:
         # 临时保存音频文件（可选，避免内存占用过大）
         temp_path = "temp_audio.wav"
         audio_file.save(temp_path)
 
         # 调用模型进行转录
-        result = model.transcribe(temp_path, language="pt", verbose=True)
+        result = model.transcribe(temp_path, language=language, verbose=True)
         text = result["text"]
+        if language == "zh":
+            from zhconv import convert
+            text = convert(text, 'zh-cn')  # 繁体转简体
 
         # 删除临时文件
         if os.path.exists(temp_path):
