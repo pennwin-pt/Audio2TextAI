@@ -51,21 +51,39 @@ def handle_transcribe_audio(language, custom_prompt):
         # --- 调用 Faster-Whisper 执行转录 ---
         # beam_size=5: 保证识别率
         # vad_filter: 过滤噪音和静音，防止“幻听”
+
         segments, info = model.transcribe(
             temp_path,
-            language=language,
-            beam_size=5,
-            # --- 关键修改点 ---
+            language="zh",
+            beam_size=10,
+            best_of=5,
+            # 稍微惩罚长句，保护短词
+            length_penalty=0.8,
+            # 强制记住你的长中文 Prompt
+            condition_on_previous_text=True,
             initial_prompt=custom_prompt,
-            condition_on_previous_text=False,  # 禁止模型根据提示词过度联想
+            # 调低门槛，即便没信心也要把“鱼”吐出来
+            log_prob_threshold=-2.0,
+            # 配合 VAD 保护单音节
             vad_filter=True,
-            vad_parameters=dict(
-                min_silence_duration_ms=200,  # 缩短静音判断，防止短语被切
-                speech_pad_ms=300  # 在声音前后多留一点余量
-            ),
-            # 提高对“无声”的判断阈值，如果真的是杂音，就返回空而不是提示词
-            no_speech_threshold=0.6
+            vad_parameters=dict(min_silence_duration_ms=500, speech_pad_ms=400)
         )
+        #
+        # segments, info = model.transcribe(
+        #     temp_path,
+        #     language=language,
+        #     beam_size=10,
+        #     # --- 关键修改点 ---
+        #     initial_prompt=custom_prompt,
+        #     condition_on_previous_text=False,  # 禁止模型根据提示词过度联想
+        #     vad_filter=True,
+        #     vad_parameters=dict(
+        #         min_silence_duration_ms=200,  # 缩短静音判断，防止短语被切
+        #         speech_pad_ms=300  # 在声音前后多留一点余量
+        #     ),
+        #     # 提高对“无声”的判断阈值，如果真的是杂音，就返回空而不是提示词
+        #     no_speech_threshold=0.6
+        # )
         # 拼接转录结果
         full_text = "".join([segment.text for segment in segments])
 
@@ -92,8 +110,10 @@ def handle_transcribe_audio(language, custom_prompt):
 @app.route('/transcribe_pt', methods=['POST'])
 def transcribe_pt_audio():
     pt_long_prompt = (
-        "Este é um áudio em português de Portugal. Contém palavras curtas e frases isoladas. "
-        "Por favor, transcreva apenas em português, sem usar inglês."
+        "Este é um áudio em português de Portugal. Pode ser apenas uma única palavra, "
+        "um termo isolado ou uma frase curta, mas é pouco provável que seja uma frase longa. "
+        "Por favor, transcreva apenas em português (PT-PT), focando na palavra ou expressão exata. "
+        "Não utilize letras ou palavras em inglês e não confunda a pronúncia com outros idiomas."
     )
     return handle_transcribe_audio("pt", pt_long_prompt)
 
