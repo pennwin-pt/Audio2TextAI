@@ -1,8 +1,14 @@
 import os
+from urllib.parse import unquote
+
 from flask import Flask, request, jsonify
 
+import subprocess
+import uuid
 import os
-import sys
+import io
+from flask import send_file
+from tts_engine import generate_piper_audio
 
 # 自动定位并添加 NVIDIA 库路径，防止 DLL 找不到
 try:
@@ -126,6 +132,62 @@ def transcribe_zh_audio():
     )
     return handle_transcribe_audio("zh", zh_long_prompt)
 
+@app.route('/tts_pt', methods=['GET'])
+def text_to_speech_pt():
+    text = request.args.get('text', '')
+    # 调用封装好的函数，指定语言为 pt
+    audio_data, error = generate_piper_audio(text, language="pt")
+
+    if error:
+        return jsonify({"status": "error", "message": error}), 500
+
+    return send_file(io.BytesIO(audio_data), mimetype="audio/wav")
+
+@app.route('/tts_hy', methods=['GET'])
+def text_to_speech_hy():
+    text = request.args.get('text', '')
+    # 调用封装好的函数，指定语言为 huayan
+    audio_data, error = generate_piper_audio(text, language="hy")
+
+    if error:
+        return jsonify({"status": "error", "message": error}), 500
+
+    return send_file(io.BytesIO(audio_data), mimetype="audio/wav")
+
+@app.route('/tts_cw', methods=['GET'])
+def text_to_speech_cw():
+    text = request.args.get('text', '')
+    # 调用封装好的函数，指定语言为 cw
+    audio_data, error = generate_piper_audio(text, language="cw")
+
+    if error:
+        return jsonify({"status": "error", "message": error}), 500
+
+    return send_file(io.BytesIO(audio_data), mimetype="audio/wav")
+
+@app.route('/tts_xy', methods=['GET'])
+def text_to_speech_xy():
+    raw_text = request.args.get('text', '')
+    text = unquote(raw_text)  # 这一步至关重要！将 %E4... 转回“你好”
+    # 调用封装好的函数，指定语言为 xy
+    audio_data, error = generate_piper_audio(text, language="xy")
+
+    if error:
+        return jsonify({"status": "error", "message": error}), 500
+
+    return send_file(io.BytesIO(audio_data), mimetype="audio/wav")
+
+
+@app.route('/tts_zh', methods=['GET'])
+def text_to_speech_zh():
+    text = request.args.get('text', '')
+    # 调用封装好的函数，指定语言为 zh
+    audio_data, error = generate_piper_audio(text, language="zh")
+
+    if error:
+        return jsonify({"status": "error", "message": error}), 500
+
+    return send_file(io.BytesIO(audio_data), mimetype="audio/wav")
 
 if __name__ == '__main__':
     # 确保端口未被占用
