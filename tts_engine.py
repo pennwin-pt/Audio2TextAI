@@ -5,8 +5,8 @@ import io
 
 # --- 核心路径配置 ---
 PIPER_EXE = r"C:\Penn\29AI\piper_windows_amd64\piper\piper.exe"
-MODEL_PT = r"C:\Penn\29AI\piper_windows_amd64\pt_PT-medium.onnx"
-MODEL_ZH = r"C:\Penn\29AI\piper_windows_amd64\zh_CN-medium.onnx"
+MODEL_PT = r"C:\Penn\29AI\piper_windows_amd64\models\pt_PT-medium.onnx"
+MODEL_ZH = r"C:\Penn\29AI\piper_windows_amd64\models\zh_CN-medium.onnx"
 MODEL_XY = r"C:\Penn\29AI\piper_windows_amd64\models\zh_CN-xiao_ya-medium.onnx"
 MODEL_CW = r"C:\Penn\29AI\piper_windows_amd64\models\zh_CN-chaowen-medium.onnx"
 MODEL_HY = r"C:\Penn\29AI\piper_windows_amd64\models\zh_CN-huayan-medium.onnx"

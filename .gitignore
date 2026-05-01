@@ -1,1 +1,6 @@
 .idea
+g2pW
+test_xy.wav
+output.wav
+__pycache__
+**/*.pyc
