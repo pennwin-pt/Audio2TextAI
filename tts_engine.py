@@ -25,16 +25,16 @@ def generate_piper_audio(text, language="pt", length_scale=None):
         default_speed = 1.0
     elif language == "hy":
         model_path = MODEL_HY
-        default_speed = 1.0
+        default_speed = 1.8
     elif language == "cw":
         model_path = MODEL_CW
-        default_speed = 1.0
+        default_speed = 1.8
     elif language == "xy":
         model_path = MODEL_XY
-        default_speed = 1.0
+        default_speed = 1.8
     else:
         model_path = MODEL_PT
-        default_speed = 1.1
+        default_speed = 1.8
 
     # 如果调用时传了 length_scale 则覆盖默认值
     speed = length_scale if length_scale is not None else default_speed
